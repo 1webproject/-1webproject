@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feed - Social Media Platform</title>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <h1>SocialHub</h1>
+            <ul>
+                <li><a href="feed.html">Feed</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="login.html">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="create-post">
+            <h2>Create a Post</h2>
+            <form>
+                <label for="postContent">What’s on your mind?</label>
+                <textarea id="postContent" name="postContent" rows="4" placeholder="Write your post here..."></textarea>
+                <button type="submit">Post</button>
+            </form>
+        </section>
+
+        <section class="feed-posts">
+            <h2>News Feed</h2>
+
+            <article class="post">
+                <header>
+                    <img src="images/user1.jpg" alt="Profile picture of Taiser" width="50" height="50" />
+                    <div>
+                        <h3>Taiser Alatie</h3>
+                        <p>3 hours ago</p>
+                    </div>
+                </header>
+
+                <p>This is my first post on this platform!</p>
+
+                <footer>
+                    <button type="button">Like</button>
+                    <button type="button">Comment</button>
+                    <a href="post.html">View Post</a>
+                </footer>
+            </article>
+
+            <article class="post">
+                <header>
+                    <img src="images/user2.jpg" alt="Profile picture of Ammar" width="50" height="50" />
+                    <div>
+                        <h3>Ammar Mohamed</h3>
+                        <p>5 hours ago</p>
+                    </div>
+                </header>
+
+                <p>Had a great day working on our web project!</p>
+
+                <footer>
+                    <button type="button">Like</button>
+                    <button type="button">Comment</button>
+                    <a href="post.html">View Post</a>
+                </footer>
+            </article>
+        </section>
+    </main>
+</body>
+
+</html>
