@@ -1,11 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>My Profile</title>
-    </head>
-    <body>
-        <h1>This is my profile</h1>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="profile-body">
+
+    <nav class="navbar">
+        <h2 class="logo">Nexora</h2>
+        <div class="nav-links">
+            <a href="feed.html">Feed</a>
+            <a href="profile.html" class="active">Profile</a>
+            <a href="login.html">Logout</a>
+        </div>
+    </nav>
+
+    <main class="profile-page">
+
+        <section class="profile-banner">
+            <img src="assets/images/banner.jpg" class="banner-img">
+        </section>
+
+        <section class="profile-info-box">
+
+            <div class="profile-top">
+                <img src="assets/images/default.png" class="profile-img">
+
+                <div class="profile-actions">
+                    <button id="editBtn">Edit Profile</button>
+                </div>
+            </div>
+
+            <div class="profile-details">
+                <h1 id="name">Name</h1>
+                <span id="handle">@username</span>
+
+                <p id="bio">Bio goes here...</p>
+
+                <div class="mood-box">
+                    <span>Current Mood:</span>
+                    <strong id="mood">🔥 Focused</strong>
+                </div>
+
+                <div class="profile-stats">
+                    <span><strong id="postsCount">0</strong> Posts</span>
+                    <span><strong id="followersCount">0</strong> Followers</span>
+                    <span><strong id="followingCount">0</strong> Following</span>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="create-post">
+            <textarea id="postInput" placeholder="Share something..."></textarea>
+            <button id="postBtn">Post</button>
+        </section>
+
+        <section id="postsContainer" class="posts-list"></section>
+
+    </main>
+
+    <script src="js/storage.js"></script>
+    <script src="js/user.js"></script>
+    <script src="js/posts.js"></script>
+    <script src="js/profile.js"></script>
+
+</body>
 </html>
