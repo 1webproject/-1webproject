@@ -3,10 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title></title>
+    <title>CMPS 350 Social - Feed</title>
   </head>
   <body>
-    <p>Paragraph</p>
-    <p>hi this is omar here :)</p>
+    <header class="header">
+      <nav class="nav" aria-label="Main navigation">
+        <a class="home" href="index.html">CMPS Social</a>
+        <div class="nav-actions">
+          <a class="nav-link" href="index.html" aria-current="page">Feed</a>
+          <a class="nav-link" href="profile.html">My Profile</a>
+          <span class="nav-user">Signed in as <strong id="navUserName" data-current-user></strong></span>
+          <button type="button" class="btn btn-secondary btn-sm" id="logoutBtn">Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container app-grid">
+      <section class="main-column">
+        <section class="panel composer-panel" aria-labelledby="composerTitle">
+          <h1 id="composerTitle">What's on your mind?</h1>
+          <form id="composerForm" class="composer-form">
+            <label for="postContent">What's happening?</label>
+            <textarea id="postContent" name="postContent" maxlength="280" rows="4" placeholder="Share your thoughts..." required></textarea>
+            <div class="composer-footer">
+              <p id="composerCounter" class="muted">0/280</p>
+              <button type="submit" class="btn btn-primary">Post</button>
+            </div>
+            <p id="composerError" class="form-error" role="alert" aria-live="polite"></p>
+          </form>
+        </section>
+        <section class="panel" aria-labelledby="feedTitle">
+          <h2 id="feedTitle">Feed</h2>
+          <div id="feedList" class="post-list"></div>
+        </section>
+      </section>
+
+      <aside class="panel side-column" aria-labelledby="peopleTitle">
+        <h2 id="peopleTitle">Discover People</h2>
+        <p class="muted">Follow users to see what they are up to.</p>
+        <div id="suggestionsList" class="suggestion-list"></div>
+      </aside>
+    </main>
+
+  <!--Scripts here-->
+
+
   </body>
 </html>
