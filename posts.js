@@ -20,14 +20,14 @@
         const wrapper = document.createElement("li");
         wrapper.className = "comment-item";
 
-        const author = window.SocialStore.getUserById(comment.authorId);
+        const author = DataManager.getUserById(comment.userId);
         const name = document.createElement("strong");
         name.className = "comment-author";
         name.textContent = author ? author.username : "Unknown";
 
         const text = document.createElement("span");
         text.className = "comment-text";
-        text.textContent = comment.text;
+        text.textContent = comment.content;
 
         const time = document.createElement("time");
         time.className = "comment-time";
@@ -50,7 +50,7 @@
         const showDetailLink = config.showDetailLink !== false;
 
         const currentUserId = config.currentUserId || null;
-        const author = window.SocialStore.getUserById(post.authorId);
+        const author = DataManager.getUserById(post.userId);
         const authorName = author ? author.username : "Unknown User";
 
         const article = document.createElement("article");
@@ -58,9 +58,9 @@
         article.dataset.postId = post.id;
 
         const header = document.createElement("header");
-        header.className = "post.head";
+        header.className = "post-head";
         const userAnchor = document.createElement("a");
-        userAnchor.href = "profile.html?user=" + encodeURIComponent(post.authorId);
+        userAnchor.href = "profile.html?user=" + encodeURIComponent(post.userId);
         userAnchor.className = "post-user";
         userAnchor.appendChild(createAvatar(author || { username: "U" }));
 
@@ -76,13 +76,13 @@
         userAnchor.appendChild(userMeta);
 
         header.appendChild(userAnchor);
-        if (showDelete && currentUserId && currentUserId === post.authorId) {
+        if (showDelete && currentUserId && currentUserId === post.userId) {
             const deleteButton = document.createElement("button");
             deleteButton.type = "button";
             deleteButton.className = "btn btn-danger btn-sm";
             deleteButton.textContent = "Delete";
             deleteButton.addEventListener("click", function onDeleteClick() {
-                const result = window.SocialStore.deletePost(post.id, currentUserId)
+                const result = DataManager.deletePost(post.id);
                 if (!result.ok) {
                     window.alert(result.error);
                     return;
@@ -111,7 +111,7 @@
                 window.location.href = "login.html";
                 return;
             }
-            const result = window.SocialStore.toggleLike(post.id, currentUserId);
+            const result = DataManager.toggleLike(post.id);
             if (!result.ok) {
                 window.alert(result.error);
                 return;
@@ -124,7 +124,7 @@
 
         const commentCount = document.createElement("span");
         commentCount.className = "muted";
-        commentCount.textContent = post.comments.length + "comment(s)";
+        commentCount.textContent = post.comments.length + " comment(s)";
         actionBar.appendChild(commentCount);
 
         if (showDetailLink) {
@@ -142,7 +142,7 @@
         commentsSection.appendChild(commentsHeader);
 
         const commentsList = document.createElement("ul");
-        commentsSection.className = "comment-list";
+        commentsList.className = "comment-list";
         const comments = post.comments.slice(-commentsLimit);
         if (comments.length === 0) {
             const emptyComment = document.createElement("li");
@@ -162,7 +162,7 @@
             const input = document.createElement("input");
             input.type = "text";
             input.name = "comment";
-            input.maxLength = window.SocialStore.COMMENT_CHAR_LIMIT;
+            input.maxLength = 200;
             input.placeholder = "Write a comment...";
             input.required = true;
             const button = document.createElement("button");
@@ -178,7 +178,7 @@
                     window.location.href = "login.html";
                     return;
                 }
-                const result = window.SocialStore.addComment(post.id, currentUserId, input.value);
+                const result = DataManager.addComment(post.id, input.value);
                 if (!result.ok) {
                     window.alert(result.error);
                     return;
@@ -223,25 +223,25 @@
     function loadPost() {
         const params = new URLSearchParams(window.location.search);
         const postId = params.get("id");
-
-        if (!postId) {
-            document.body.innerHTML = "<p>Post not found</p>";
-            return;
-        }
-
-        const posts = window.SocialStore.getPosts();
-        const post = posts.find(p => String(p.id) === String(postId));
-
-        if (!post) {
-            document.body.innerHTML = "<p>Post not found</p>";
-            return;
-        }
-
         const container = document.querySelector(".single-post");
 
-        if (!container) return;
+        if (!container) {
+            return;
+        }
 
-        const currentUser = window.SocialStore.getCurrentUser();
+        if (!postId) {
+            container.innerHTML = "<h2>Post Details</h2><p>Post not found.</p>";
+            return;
+        }
+
+        const post = DataManager.getPostsById(postId);
+
+        if (!post) {
+            container.innerHTML = "<h2>Post Details</h2><p>Post not found.</p>";
+            return;
+        }
+
+        const currentUser = DataManager.getCurrentUser();
         const currentUserId = currentUser ? currentUser.id : null;
 
         container.innerHTML = "<h2>Post Details</h2>";
@@ -256,4 +256,5 @@
 
         container.appendChild(postCard);
     }
+    window.loadPost = loadPost;
 })();
