@@ -1,165 +1,204 @@
-(function profilePageController() {
+(function () {
     "use strict";
 
-    function byId(id) {
-        return document.getElementById(id);
-    }
-
-    function getTargetUserId(currentUserId) {
+    function getProfileUserId() {
         const params = new URLSearchParams(window.location.search);
-        return params.get("user") || currentUserId;
+        return params.get("user");
     }
 
-    function renderProfileHeader(currentUser, profileUser) {
-        const name = byId("profileName");
-        const email = byId("profileEmail");
-        const bio = byId("profileBio");
-        const avatar = byId("profileAvatar");
-        const postsCount = byId("profilePostCount");
-        const followButton = byId("followToggleBtn");
-        const myProfileLink = byId("myProfileLink");
+    function getViewedUser() {
+        const userIdFromUrl = getProfileUserId();
 
-        if (myProfileLink) {
-            myProfileLink.href = "profile.html?user=" + encodeURIComponent(currentUser.id);
-        }
-        if (name) {
-            name.textContent = profileUser.username;
-        }
-        if (email) {
-            email.textContent = profileUser.email;
-        }
-        if (bio) {
-            bio.textContent = profileUser.bio || "No bio yet.";
-        }
-        if (avatar) {
-            avatar.textContent = profileUser.username.charAt(0).toUpperCase();
-            avatar.style.backgroundColor = profileUser.avatarColor || "#1f7a8c";
+        if (userIdFromUrl) {
+            return DataManager.getUserById(userIdFromUrl);
         }
 
-        const postTotal = window.SocialStore.getUserPosts(profileUser.id).length;
-        if (postsCount) {
-            postsCount.textContent = String(postTotal);
-        }
-
-        if (!followButton) {
-            return;
-        }
-        if (profileUser.id === currentUser.id) {
-            followButton.classList.add("is-hidden");
-            return;
-        }
-        followButton.classList.remove("is-hidden");
-        const following = window.SocialStore.isFollowing(currentUser.id, profileUser.id);
-        followButton.textContent = following ? "Unfollow" : "Follow";
-        followButton.className =
-            "btn " + (following ? "btn-secondary" : "btn-primary");
-        followButton.onclick = function onFollowClick() {
-            const result = window.SocialStore.toggleFollow(currentUser.id, profileUser.id);
-            if (!result.ok) {
-                window.alert(result.error);
-                return;
-            }
-            renderPage();
-        };
+        return DataManager.getCurrentUser();
     }
 
-    function renderPosts(currentUser, profileUser) {
-        const container = byId("profilePosts");
-        if (!container) {
+    function fillProfileInfo(user) {
+        const nameEl = document.getElementById("name");
+        const handleEl = document.getElementById("handle");
+        const bioEl = document.getElementById("bio");
+        const postsCountEl = document.getElementById("postsCount");
+        const followersCountEl = document.getElementById("followersCount");
+        const followingCountEl = document.getElementById("followingCount");
+        const profileImg = document.querySelector(".profile-img");
+
+        if (nameEl) {
+            nameEl.textContent = user.username || "Unknown User";
+        }
+
+        if (handleEl) {
+            handleEl.textContent = "@" + (user.username || "user").toLowerCase().replace(/\s+/g, "");
+        }
+
+        if (bioEl) {
+            bioEl.textContent = user.bio && user.bio.trim() !== "" ? user.bio : "No bio yet.";
+        }
+
+        if (profileImg && user.profilePicture) {
+            profileImg.src = user.profilePicture;
+            profileImg.alt = user.username + " profile picture";
+        }
+
+        const stats = DataManager.getStats(user.id);
+
+        if (postsCountEl) {
+            postsCountEl.textContent = stats.postCount;
+        }
+
+        if (followersCountEl) {
+            followersCountEl.textContent = stats.followersCount;
+        }
+
+        if (followingCountEl) {
+            followingCountEl.textContent = stats.followingCount;
+        }
+    }
+
+    function renderUserPosts(userId) {
+        const postsContainer = document.getElementById("postsContainer");
+
+        if (!postsContainer) {
             return;
         }
-        const posts = window.SocialStore.getUserPosts(profileUser.id);
-        window.PostUI.renderPostList(container, posts, {
-            currentUserId: currentUser.id,
-            commentsLimit: 3,
-            showDetailLink: true,
-            showDelete: true,
+
+        const posts = DataManager.getUserPosts(userId);
+
+        postsContainer.innerHTML = "";
+
+        if (!posts.length) {
+            postsContainer.innerHTML = "<p>No posts yet.</p>";
+            return;
+        }
+
+        const currentUser = DataManager.getCurrentUser();
+        const currentUserId = currentUser ? currentUser.id : null;
+
+        window.postUI.renderPostList(postsContainer, posts, {
+            currentUserId: currentUserId,
             showCommentForm: true,
-            onChange: renderPage,
+            commentsLimit: 2,
+            showDetailLink: true,
+            onChange: loadProfile
         });
     }
 
-    function setupEditor(currentUser, profileUser) {
-        const section = byId("editProfileSection");
-        const form = byId("editProfileForm");
-        const error = byId("editProfileError");
-        const username = byId("editUsername");
-        const email = byId("editEmail");
-        const bio = byId("editBio");
-        const avatarColor = byId("editAvatarColor");
-        const bioCounter = byId("bioCounter");
+    function setupPostCreation(viewedUser, currentUser) {
+        const postInput = document.getElementById("postInput");
+        const postBtn = document.getElementById("postBtn");
 
-        if (!section || !form || !error || !username || !email || !bio || !avatarColor) {
+        if (!postInput || !postBtn) {
             return;
         }
 
-        if (profileUser.id !== currentUser.id) {
-            section.classList.add("is-hidden");
+        if (!currentUser || currentUser.id !== viewedUser.id) {
+            postInput.disabled = true;
+            postBtn.disabled = true;
+            postInput.placeholder = "You can only post on your own profile.";
             return;
         }
-        section.classList.remove("is-hidden");
-        username.value = profileUser.username;
-        email.value = profileUser.email;
-        bio.value = profileUser.bio || "";
-        avatarColor.value = profileUser.avatarColor || "#1f7a8c";
-        if (bioCounter) {
-            bioCounter.textContent = bio.value.length + "/180";
-        }
 
-        bio.oninput = function onBioInput() {
-            if (bioCounter) {
-                bioCounter.textContent = bio.value.length + "/180";
-            }
-        };
+        postBtn.addEventListener("click", function () {
+            const content = postInput.value.trim();
 
-        form.onsubmit = function onProfileSubmit(event) {
-            event.preventDefault();
-            error.textContent = "";
-            const result = window.SocialStore.updateProfile(currentUser.id, {
-                username: username.value,
-                email: email.value,
-                bio: bio.value,
-                avatarColor: avatarColor.value,
-            });
-            if (!result.ok) {
-                error.textContent = result.error;
+            if (content === "") {
+                alert("Please write something before posting.");
                 return;
             }
-            renderPage();
-        };
+
+            const result = DataManager.addPost({ content: content });
+
+            if (!result.success) {
+                alert(result.message || "Could not create post.");
+                return;
+            }
+
+            postInput.value = "";
+            loadProfile();
+        });
     }
 
-    function renderPage() {
-        const currentUser = window.SocialStore.getCurrentUser();
+    function setupProfileActions(viewedUser, currentUser) {
+        const actionsBox = document.querySelector(".profile-actions");
+        const editBtn = document.getElementById("editBtn");
+
+        if (!actionsBox || !currentUser) {
+            return;
+        }
+
+        if (currentUser.id === viewedUser.id) {
+            if (editBtn) {
+                editBtn.addEventListener("click", function () {
+                    const newBio = prompt("Edit your bio:", viewedUser.bio || "");
+
+                    if (newBio === null) {
+                        return;
+                    }
+
+                    const result = DataManager.updateUser(viewedUser.id, {
+                        bio: newBio.trim()
+                    });
+
+                    if (!result.success) {
+                        alert(result.message || "Could not update profile.");
+                        return;
+                    }
+
+                    loadProfile();
+                });
+            }
+            return;
+        }
+
+        if (editBtn) {
+            editBtn.remove();
+        }
+
+        const followBtn = document.createElement("button");
+        followBtn.id = "followBtn";
+
+        const isFollowing = currentUser.following.includes(viewedUser.id);
+        followBtn.textContent = isFollowing ? "Unfollow" : "Follow";
+
+        followBtn.addEventListener("click", function () {
+            const result = DataManager.toggleFollow(viewedUser.id);
+
+            if (!result.success) {
+                alert(result.message || "Could not update follow status.");
+                return;
+            }
+
+            loadProfile();
+        });
+
+        actionsBox.appendChild(followBtn);
+    }
+
+    function loadProfile() {
+        const currentUser = DataManager.getCurrentUser();
+
         if (!currentUser) {
             window.location.href = "login.html";
             return;
         }
 
-        window.AuthUI.setCurrentUserName("#navUserName");
-        const targetUserId = getTargetUserId(currentUser.id);
-        const profileUser = window.SocialStore.getUserById(targetUserId);
-        if (!profileUser) {
-            const container = byId("profilePosts");
-            if (container) {
-                container.innerHTML = "<p class='empty-state'>Profile not found.</p>";
+        const viewedUser = getViewedUser();
+
+        if (!viewedUser) {
+            const profilePage = document.querySelector(".profile-page");
+            if (profilePage) {
+                profilePage.innerHTML = "<p>User not found.</p>";
             }
             return;
         }
 
-        renderProfileHeader(currentUser, profileUser);
-        setupEditor(currentUser, profileUser);
-        renderPosts(currentUser, profileUser);
+        fillProfileInfo(viewedUser);
+        renderUserPosts(viewedUser.id);
+        setupPostCreation(viewedUser, currentUser);
+        setupProfileActions(viewedUser, currentUser);
     }
 
-    function init() {
-        const currentUser = window.AuthUI.requireAuth();
-        if (!currentUser) {
-            return;
-        }
-        window.AuthUI.bindLogoutButton("#logoutBtn");
-        renderPage();
-    }
-
-    document.addEventListener("DOMContentLoaded", init);
+    window.loadProfile = loadProfile;
 })();
