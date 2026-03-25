@@ -10,13 +10,23 @@
     return user ? JSON.parse(user) : null;
   }
 
-  function getPosts() {
-    if (typeof DataManager !== "undefined" && typeof DataManager.getPosts === "function") {
-      return DataManager.getPosts();
+  function getFeedPosts() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      return [];
     }
 
-    const posts = localStorage.getItem("posts");
-    return posts ? JSON.parse(posts) : [];
+    if (typeof DataManager !== "undefined" && typeof DataManager.getFeedPosts === "function") {
+      return DataManager.getFeedPosts("following");
+    }
+
+    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+    const following = Array.isArray(currentUser.following) ? currentUser.following : [];
+
+    return posts.filter(function (post) {
+      return post.userId === currentUser.id || following.includes(post.userId);
+    });
   }
 
   function escapeHtml(value) {
@@ -71,6 +81,52 @@
     `;
   }
 
+  function getSuggestedUsers() {
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      return [];
+    }
+
+    if (typeof DataManager !== "undefined" && typeof DataManager.getSuggestedUsers === "function") {
+      return DataManager.getSuggestedUsers();
+    }
+
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    const following = Array.isArray(currentUser.following) ? currentUser.following : [];
+
+    return users
+      .filter(function (user) {
+        return user.id !== currentUser.id && !following.includes(user.id);
+      })
+      .slice(0, 5);
+  }
+
+  function buildSuggestedUserCard(user) {
+    const avatar = user.profilePicture && user.profilePicture.trim() !== ""
+      ? user.profilePicture
+      : "https://via.placeholder.com/50";
+    const bio = user.bio && user.bio.trim() !== ""
+      ? user.bio
+      : "No bio yet.";
+
+    return `
+      <article class="suggested-user">
+        <header>
+          <img src="${escapeHtml(avatar)}" alt="${escapeHtml(user.username)} avatar" width="50" height="50" />
+          <div>
+            <h3>${escapeHtml(user.username)}</h3>
+            <p>${escapeHtml(bio)}</p>
+          </div>
+        </header>
+        <div class="suggested-actions">
+          <a href="profile.html?user=${encodeURIComponent(user.id)}">View Profile</a>
+          <button type="button" class="follow-user-btn" data-user-id="${escapeHtml(user.id)}">Follow</button>
+        </div>
+      </article>
+    `;
+  }
+
   function attachPostActions() {
     const likeButtons = document.querySelectorAll(".like-btn");
     const commentButtons = document.querySelectorAll(".comment-btn");
@@ -108,18 +164,55 @@
     });
   }
 
+  function attachFollowActions() {
+    const followButtons = document.querySelectorAll(".follow-user-btn");
+
+    followButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        const currentUser = getCurrentUser();
+
+        if (!currentUser) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        if (typeof DataManager === "undefined" || typeof DataManager.toggleFollow !== "function") {
+          return;
+        }
+
+        const targetUserId = button.getAttribute("data-user-id");
+        const result = DataManager.toggleFollow(targetUserId);
+
+        if (!result.success) {
+          alert(result.message || "Could not follow this user.");
+          return;
+        }
+
+        renderPosts();
+        renderSuggestedUsers();
+      });
+    });
+  }
+
   function renderPosts() {
     const postsContainer = document.querySelector(".feed-posts");
+    const currentUser = getCurrentUser();
 
     if (!postsContainer) {
       return;
     }
 
-    const posts = getPosts();
+    const posts = getFeedPosts();
     postsContainer.innerHTML = "<h2>News Feed</h2>";
 
     if (posts.length === 0) {
-      postsContainer.innerHTML += "<p>No posts available yet.</p>";
+      const following = currentUser && Array.isArray(currentUser.following) ? currentUser.following : [];
+
+      if (following.length === 0) {
+        postsContainer.innerHTML += "<p>Follow users to see their posts in your feed.</p>";
+      } else {
+        postsContainer.innerHTML += "<p>No posts from followed users yet.</p>";
+      }
       return;
     }
 
@@ -128,6 +221,28 @@
     });
 
     attachPostActions();
+  }
+
+  function renderSuggestedUsers() {
+    const discoverList = document.getElementById("discoverList");
+
+    if (!discoverList) {
+      return;
+    }
+
+    const suggestedUsers = getSuggestedUsers();
+    discoverList.innerHTML = "";
+
+    if (suggestedUsers.length === 0) {
+      discoverList.innerHTML = "<p class=\"muted\">No new suggestions right now.</p>";
+      return;
+    }
+
+    suggestedUsers.forEach(function (user) {
+      discoverList.innerHTML += buildSuggestedUserCard(user);
+    });
+
+    attachFollowActions();
   }
 
   function setupCreatePost() {
@@ -182,6 +297,7 @@
     }
 
     renderPosts();
+    renderSuggestedUsers();
     setupCreatePost();
   }
 

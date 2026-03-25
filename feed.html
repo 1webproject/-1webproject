@@ -4,41 +4,48 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Feed - Social Media Platform</title>
+    <title>Feed - SocialHub</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 
-<body>
-    <header>
-        <nav>
+<body class="app-page">
+    <header class="topbar">
+        <nav class="site-nav">
             <h1>SocialHub</h1>
             <ul>
                 <li><a href="feed.html">Feed</a></li>
                 <li><a href="profile.html">Profile</a></li>
-                <li><a href="login.html">Logout</a></li>
+                <li><a href="login.html" data-logout>Logout</a></li>
             </ul>
         </nav>
     </header>
 
-    <main>
-        <section class="create-post">
-            <h2>Create a Post</h2>
-            <form>
-                <label for="postContent">What’s on your mind?</label>
-                <textarea id="postContent" name="postContent" rows="4" placeholder="Write your post here..."></textarea>
-                <button type="submit">Post</button>
-            </form>
+    <main class="page-shell feed-layout">
+        <section class="feed-main">
+            <section class="create-post card">
+                <h2>Create a Post</h2>
+                <form>
+                    <label for="postContent">What is on your mind?</label>
+                    <textarea id="postContent" name="postContent" rows="4" placeholder="Write your post here..."></textarea>
+                    <button type="submit">Post</button>
+                </form>
+            </section>
+
+            <section class="feed-posts card">
+                <h2>News Feed</h2>
+            </section>
         </section>
 
-        <section class="feed-posts">
-            <h2>News Feed</h2>
-        </section>
+        <aside class="discover card">
+            <h2>Discover People</h2>
+            <p class="muted">Follow people to unlock their posts in your feed.</p>
+            <div id="discoverList" class="discover-list"></div>
+        </aside>
     </main>
-
 
     <script src="data.js"></script>
     <script src="feed.js"></script>
     <script src="app.js"></script>
-
 </body>
 
 </html>

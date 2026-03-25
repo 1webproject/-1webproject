@@ -7,19 +7,19 @@ document.addEventListener("DOMContentLoaded", function () {
     loginForm.addEventListener("submit", function (event) {
       event.preventDefault();
 
-      const email = document.getElementById("email").value.trim();
+      const email = document.getElementById("email").value.trim().toLowerCase();
       const password = document.getElementById("password").value.trim();
       const errorDiv = document.getElementById("login-error");
+      errorDiv.textContent = "";
 
       if (!email || !password) {
         errorDiv.textContent = "Please fill in all fields.";
         return;
       }
 
-      const users = DataManager.getUsers();
-      const user = users.find(u => u.email === email && u.password === password);
+      const user = DataManager.getUserByEmail(email);
 
-      if (user) {
+      if (user && user.password === password) {
         DataManager.setCurrentUser(user);
         window.location.href = "feed.html";
       } else {
@@ -37,12 +37,14 @@ document.addEventListener("DOMContentLoaded", function () {
       event.preventDefault();
 
       const username = document.getElementById("username").value.trim();
-      const email = document.getElementById("email").value.trim();
+      const email = document.getElementById("email").value.trim().toLowerCase();
       const password = document.getElementById("password").value.trim();
       const confirmPassword = document.getElementById("confirm-password").value.trim();
-      const profilePicture = document.getElementById("profile-picture").value.trim();
+      const profilePictureInput = document.getElementById("profile-picture");
+      const profilePicture = profilePictureInput ? profilePictureInput.value.trim() : "";
       const bio = document.getElementById("bio").value.trim();
       const errorDiv = document.getElementById("register-error");
+      errorDiv.textContent = "";
 
       if (!username || !email || !password || !confirmPassword) {
         errorDiv.textContent = "Please fill in all required fields.";
@@ -84,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
   const currentUser = DataManager.getCurrentUser();
-  const currentPage = window.location.pathname.split("/").pop();
+  const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const isAuthPage = currentPage === "login.html" || currentPage === "register.html";
 
   if (currentUser && isAuthPage) {

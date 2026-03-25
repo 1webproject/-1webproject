@@ -2,49 +2,39 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - SocialHub</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 
-<body class="profile-body">
-
-    <nav class="navbar">
-        <h2 class="logo">Nexora</h2>
-        <div class="nav-links">
-            <a href="feed.html">Feed</a>
-            <a href="profile.html" class="active">Profile</a>
-            <a href="login.html">Logout</a>
-        </div>
-    </nav>
+<body class="app-page profile-body">
+    <header class="topbar">
+        <nav class="site-nav">
+            <h1>SocialHub</h1>
+            <ul>
+                <li><a href="feed.html">Feed</a></li>
+                <li><a href="profile.html" class="active">Profile</a></li>
+                <li><a href="login.html" data-logout>Logout</a></li>
+            </ul>
+        </nav>
+    </header>
 
     <main class="profile-page">
-
         <section class="profile-banner">
-            <img src="images/banner.jpeg" class="banner-img" alt="profile banner">
+            <img src="images/banner.jpeg" class="banner-img" alt="Profile banner" />
         </section>
 
-        <section class="profile-info-box">
-
+        <section class="profile-info-box card">
             <div class="profile-top">
-                <img src="images/pfp.jpg" class="profile-img" alt="profile picture">
-
-                <div class="profile-actions">
-                    <button id="editBtn">Edit Profile</button>
-                </div>
+                <img src="images/pfp.jpg" class="profile-img" alt="Profile picture" />
+                <div class="profile-actions"></div>
             </div>
 
             <div class="profile-details">
                 <h1 id="name">Name</h1>
                 <span id="handle">@username</span>
-
                 <p id="bio">Bio goes here...</p>
-
-                <div class="mood-box">
-                    <span>Current Mood:</span>
-                    <strong id="mood">🔥 Focused</strong>
-                </div>
 
                 <div class="profile-stats">
                     <span><strong id="postsCount">0</strong> Posts</span>
@@ -52,23 +42,20 @@
                     <span><strong id="followingCount">0</strong> Following</span>
                 </div>
             </div>
-
         </section>
 
-        <section class="create-post">
+        <section class="create-post card">
             <textarea id="postInput" placeholder="Share something..."></textarea>
             <button id="postBtn">Post</button>
         </section>
 
         <section id="postsContainer" class="posts-list"></section>
-
     </main>
 
     <script src="data.js"></script>
     <script src="posts.js"></script>
     <script src="profile.js"></script>
     <script src="app.js"></script>
-
 </body>
 
 </html>

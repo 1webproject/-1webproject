@@ -29,20 +29,22 @@ const DataManager = {
 
   getUserByEmail(email) {
     const users = this.getUsers();
-    return users.find(u => u.email === email) || null;
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    return users.find(u => String(u.email || "").trim().toLowerCase() === normalizedEmail) || null;
   },
 
   addUser(userData) {
     const users = this.getUsers();
+    const normalizedEmail = String(userData.email || "").trim().toLowerCase();
 
-    if (this.getUserByEmail(userData.email)) {
+    if (this.getUserByEmail(normalizedEmail)) {
       return { success: false, message: "Email already exists." };
     }
 
     const newUser = {
       id: Date.now().toString(),
       username: userData.username,
-      email: userData.email,
+      email: normalizedEmail,
       password: userData.password,
       profilePicture: userData.profilePicture || "",
       bio: userData.bio || "",
@@ -110,8 +112,24 @@ const DataManager = {
 
   deletePost(postId) {
     const posts = this.getPosts();
-    const filteredPosts = posts.filter(p => p.id !== postId);
-    this.savePosts(filteredPosts);
+    const currentUser = this.getCurrentUser();
+
+    if (!currentUser) {
+      return { success: false, message: "User not logged in." };
+    }
+
+    const postIndex = posts.findIndex(p => p.id === postId);
+
+    if (postIndex === -1) {
+      return { success: false, message: "Post not found." };
+    }
+
+    if (posts[postIndex].userId !== currentUser.id) {
+      return { success: false, message: "You can only delete your own posts." };
+    }
+
+    posts.splice(postIndex, 1);
+    this.savePosts(posts);
     return { success: true };
 
   },
@@ -141,6 +159,7 @@ const DataManager = {
     }
 
     const post = posts[postIndex];
+    post.likes = Array.isArray(post.likes) ? post.likes : [];
     const likeIndex = post.likes.indexOf(currentUser.id);
 
     if (likeIndex === -1) {
@@ -157,9 +176,14 @@ const DataManager = {
   addComment(postId, content) {
     const posts = this.getPosts();
     const currentUser = this.getCurrentUser();
+    const trimmedContent = String(content || "").trim();
 
     if (!currentUser) {
       return { success: false, message: "User not logged in." };
+    }
+
+    if (!trimmedContent) {
+      return { success: false, message: "Comment cannot be empty." };
     }
 
     const postIndex = posts.findIndex(p => p.id === postId);
@@ -173,10 +197,11 @@ const DataManager = {
       userId: currentUser.id,
       username: currentUser.username,
       userProfilePicture: currentUser.profilePicture,
-      content: content,
+      content: trimmedContent,
       createdAt: new Date().toISOString()
     };
 
+    posts[postIndex].comments = Array.isArray(posts[postIndex].comments) ? posts[postIndex].comments : [];
     posts[postIndex].comments.push(newComment);
     this.savePosts(posts);
     return { success: true, comment: newComment };
@@ -196,6 +221,7 @@ const DataManager = {
       return { success: false, message: "Post not found." };
     }
 
+    posts[postIndex].comments = Array.isArray(posts[postIndex].comments) ? posts[postIndex].comments : [];
     const commentIndex = posts[postIndex].comments.findIndex(c => c.id === commentId);
 
     if (commentIndex === -1) {
@@ -230,6 +256,13 @@ const DataManager = {
       return { success: false, message: "User not found." };
     }
 
+    users[currentUserIndex].following = Array.isArray(users[currentUserIndex].following)
+      ? users[currentUserIndex].following
+      : [];
+    users[targetUserIndex].followers = Array.isArray(users[targetUserIndex].followers)
+      ? users[targetUserIndex].followers
+      : [];
+
     const followIndex = users[currentUserIndex].following.indexOf(userId);
 
     if (followIndex === -1) {
@@ -239,7 +272,9 @@ const DataManager = {
     else {
       users[currentUserIndex].following.splice(followIndex, 1);
       const followerIndex = users[targetUserIndex].followers.indexOf(currentUser.id);
-      users[targetUserIndex].followers.splice(followerIndex, 1);
+      if (followerIndex !== -1) {
+        users[targetUserIndex].followers.splice(followerIndex, 1);
+      }
     }
 
     this.saveUsers(users);
@@ -260,7 +295,9 @@ const DataManager = {
       return [];
     }
 
-    return users.filter(u => u.id !== currentUser.id && !currentUser.following.includes(u.id)).slice(0, 5);
+    const currentFollowing = Array.isArray(currentUser.following) ? currentUser.following : [];
+
+    return users.filter(u => u.id !== currentUser.id && !currentFollowing.includes(u.id)).slice(0, 5);
   },
 
   getFeedPosts(filter = "all") {
@@ -271,8 +308,10 @@ const DataManager = {
       return [];
     }
 
+    const currentFollowing = Array.isArray(currentUser.following) ? currentUser.following : [];
+
     if (filter === "following") {
-      return posts.filter(p => currentUser.following.includes(p.userId) || p.userId === currentUser.id);
+      return posts.filter(p => currentFollowing.includes(p.userId) || p.userId === currentUser.id);
     }
 
     return posts;
@@ -290,8 +329,8 @@ const DataManager = {
 
     return {
       postCount: posts.length,
-      followersCount: user ? user.followers.length : 0,
-      followingCount: user ? user.following.length : 0,
+      followersCount: user && Array.isArray(user.followers) ? user.followers.length : 0,
+      followingCount: user && Array.isArray(user.following) ? user.following.length : 0,
       likedCount: likedPosts.length
     };
   },

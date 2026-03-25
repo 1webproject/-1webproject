@@ -1,6 +1,18 @@
 (function attachPostUI() {
     "use strict";
 
+    function isResultSuccess(result) {
+        return Boolean(result && (result.success === true || result.ok === true));
+    }
+
+    function getResultMessage(result, fallbackMessage) {
+        if (!result) {
+            return fallbackMessage;
+        }
+
+        return result.message || result.error || fallbackMessage;
+    }
+
     function formatDateTime(timestamp) {
         return new Intl.DateTimeFormat('en-US', {
             dateStyle: "medium",
@@ -27,7 +39,7 @@
 
         const text = document.createElement("span");
         text.className = "comment-text";
-        text.textContent = comment.content;
+        text.textContent = comment.content || comment.text || "";
 
         const time = document.createElement("time");
         time.className = "comment-time";
@@ -52,6 +64,8 @@
         const currentUserId = config.currentUserId || null;
         const author = DataManager.getUserById(post.userId);
         const authorName = author ? author.username : "Unknown User";
+        const postLikes = Array.isArray(post.likes) ? post.likes : [];
+        const postComments = Array.isArray(post.comments) ? post.comments : [];
 
         const article = document.createElement("article");
         article.className = "post-card";
@@ -83,8 +97,8 @@
             deleteButton.textContent = "Delete";
             deleteButton.addEventListener("click", function onDeleteClick() {
                 const result = DataManager.deletePost(post.id);
-                if (!result.ok) {
-                    window.alert(result.error);
+                if (!isResultSuccess(result)) {
+                    window.alert(getResultMessage(result, "Could not delete post."));
                     return;
                 }
                 if (typeof config.onChange === "function") {
@@ -104,16 +118,16 @@
         const likeButton = document.createElement("button");
         likeButton.type = "button";
         likeButton.className = "btn btn-secondary btn-sm";
-        const liked = currentUserId ? post.likes.includes(currentUserId) : false;
-        likeButton.textContent = (liked ? "Unlike" : "Like") + " (" + post.likes.length + ")";
+        const liked = currentUserId ? postLikes.includes(currentUserId) : false;
+        likeButton.textContent = (liked ? "Unlike" : "Like") + " (" + postLikes.length + ")";
         likeButton.addEventListener("click", function onLikeClick() {
             if (!currentUserId) {
                 window.location.href = "login.html";
                 return;
             }
             const result = DataManager.toggleLike(post.id);
-            if (!result.ok) {
-                window.alert(result.error);
+            if (!isResultSuccess(result)) {
+                window.alert(getResultMessage(result, "Could not update like."));
                 return;
             }
             if (typeof config.onChange === "function") {
@@ -124,7 +138,7 @@
 
         const commentCount = document.createElement("span");
         commentCount.className = "muted";
-        commentCount.textContent = post.comments.length + " comment(s)";
+        commentCount.textContent = postComments.length + " comment(s)";
         actionBar.appendChild(commentCount);
 
         if (showDetailLink) {
@@ -143,7 +157,7 @@
 
         const commentsList = document.createElement("ul");
         commentsList.className = "comment-list";
-        const comments = post.comments.slice(-commentsLimit);
+        const comments = postComments.slice(-commentsLimit);
         if (comments.length === 0) {
             const emptyComment = document.createElement("li");
             emptyComment.className = "muted";
@@ -178,9 +192,10 @@
                     window.location.href = "login.html";
                     return;
                 }
-                const result = DataManager.addComment(post.id, input.value);
-                if (!result.ok) {
-                    window.alert(result.error);
+                const commentText = input.value.trim();
+                const result = DataManager.addComment(post.id, commentText);
+                if (!isResultSuccess(result)) {
+                    window.alert(getResultMessage(result, "Could not add comment."));
                     return;
                 }
                 form.reset();

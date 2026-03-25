@@ -96,11 +96,16 @@
         if (!currentUser || currentUser.id !== viewedUser.id) {
             postInput.disabled = true;
             postBtn.disabled = true;
+            postBtn.onclick = null;
             postInput.placeholder = "You can only post on your own profile.";
             return;
         }
 
-        postBtn.addEventListener("click", function () {
+        postInput.disabled = false;
+        postBtn.disabled = false;
+        postInput.placeholder = "Share something...";
+
+        postBtn.onclick = function () {
             const content = postInput.value.trim();
 
             if (content === "") {
@@ -117,52 +122,52 @@
 
             postInput.value = "";
             loadProfile();
-        });
+        };
     }
 
     function setupProfileActions(viewedUser, currentUser) {
         const actionsBox = document.querySelector(".profile-actions");
-        const editBtn = document.getElementById("editBtn");
 
         if (!actionsBox || !currentUser) {
             return;
         }
 
+        actionsBox.innerHTML = "";
+
         if (currentUser.id === viewedUser.id) {
-            if (editBtn) {
-                editBtn.addEventListener("click", function () {
-                    const newBio = prompt("Edit your bio:", viewedUser.bio || "");
+            const editBtn = document.createElement("button");
+            editBtn.id = "editBtn";
+            editBtn.textContent = "Edit Profile";
+            editBtn.onclick = function () {
+                const newBio = prompt("Edit your bio:", viewedUser.bio || "");
 
-                    if (newBio === null) {
-                        return;
-                    }
+                if (newBio === null) {
+                    return;
+                }
 
-                    const result = DataManager.updateUser(viewedUser.id, {
-                        bio: newBio.trim()
-                    });
-
-                    if (!result.success) {
-                        alert(result.message || "Could not update profile.");
-                        return;
-                    }
-
-                    loadProfile();
+                const result = DataManager.updateUser(viewedUser.id, {
+                    bio: newBio.trim()
                 });
-            }
-            return;
-        }
 
-        if (editBtn) {
-            editBtn.remove();
+                if (!result.success) {
+                    alert(result.message || "Could not update profile.");
+                    return;
+                }
+
+                loadProfile();
+            };
+            actionsBox.appendChild(editBtn);
+            return;
         }
 
         const followBtn = document.createElement("button");
         followBtn.id = "followBtn";
 
-        const isFollowing = currentUser.following.includes(viewedUser.id);
+        const following = Array.isArray(currentUser.following) ? currentUser.following : [];
+        const isFollowing = following.includes(viewedUser.id);
         followBtn.textContent = isFollowing ? "Unfollow" : "Follow";
 
-        followBtn.addEventListener("click", function () {
+        followBtn.onclick = function () {
             const result = DataManager.toggleFollow(viewedUser.id);
 
             if (!result.success) {
@@ -171,7 +176,7 @@
             }
 
             loadProfile();
-        });
+        };
 
         actionsBox.appendChild(followBtn);
     }
