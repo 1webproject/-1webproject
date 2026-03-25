@@ -10,18 +10,18 @@ const DataManager = {
   },
 
   getCurrentUser(user) {
-    const user = localStorage.getItem("currentUser_user");
+    const user = localStorage.getItem("currentUser");
     return user ? JSON.parse(user) : null;
   },
 
   setCurrentUser(user) {
-    localStorage.setItem("currentUser_user", JSON.stringify(user));
+    localStorage.setItem("currentUser", JSON.stringify(user));
   },
 
   logout() {
-    localStorage.removeItem("currentUser_user");
+    localStorage.removeItem("currentUser");
   },
-  
+
   getUserById(userId) {
     const users = this.getUsers();
     return users.find(u => u.id === userId) || null;
@@ -56,7 +56,7 @@ const DataManager = {
     return { success: true, user: newUser };
   },
 
-    updateUser(userId,updatedUser) {
+  updateUser(userId, updatedUser) {
     const users = this.getUsers();
     const index = users.findIndex(u => u.id === userId);
 
@@ -78,7 +78,7 @@ const DataManager = {
     const posts = localStorage.getItem("posts");
     return posts ? JSON.parse(posts) : [];
   },
-  
+
   savePosts(posts) {
     localStorage.setItem("posts", JSON.stringify(posts));
   },
@@ -113,10 +113,10 @@ const DataManager = {
     const filteredPosts = posts.filter(p => p.id !== postId);
     this.savePosts(filteredPosts);
     return { success: true };
-    
-    },
 
-    getPostsById(postId) {
+  },
+
+  getPostsById(postId) {
     const posts = this.getPosts();
     return posts.find(p => p.id === postId) || null;
   },
@@ -144,17 +144,17 @@ const DataManager = {
     const likeIndex = post.likes.indexOf(currentUser.id);
 
     if (likeIndex === -1) {
-        post.likes.push(currentUser.id);
-    } 
-    else {
-        post.likes.splice(likeIndex, 1);
+      post.likes.push(currentUser.id);
     }
-    
+    else {
+      post.likes.splice(likeIndex, 1);
+    }
+
     this.savePosts(posts);
     return { success: true, likes: post.likes };
   },
 
-    addComment(postId, content) {
+  addComment(postId, content) {
     const posts = this.getPosts();
     const currentUser = this.getCurrentUser();
 
@@ -174,7 +174,7 @@ const DataManager = {
       username: currentUser.username,
       userProfilePicture: currentUser.profilePicture,
       content: content,
-      createdAt: new Date().toISOString()   
+      createdAt: new Date().toISOString()
     };
 
     posts[postIndex].comments.push(newComment);
@@ -222,7 +222,7 @@ const DataManager = {
     if (currentUser.id === userId) {
       return { success: false, message: "You cannot follow yourself." };
     }
-    
+
     const targetUserIndex = users.findIndex(u => u.id === userId);
     const currentUserIndex = users.findIndex(u => u.id === currentUser.id);
 
@@ -235,7 +235,7 @@ const DataManager = {
     if (followIndex === -1) {
       users[currentUserIndex].following.push(userId);
       users[targetUserIndex].followers.push(currentUser.id);
-    } 
+    }
     else {
       users[currentUserIndex].following.splice(followIndex, 1);
       const followerIndex = users[targetUserIndex].followers.indexOf(currentUser.id);
@@ -245,13 +245,13 @@ const DataManager = {
     this.saveUsers(users);
     this.setCurrentUser(users[currentUserIndex]);
 
-    return { 
-        success: true, 
-        following: users[currentUserIndex].following,
-        followers: users[targetUserIndex].followers
-     };
+    return {
+      success: true,
+      following: users[currentUserIndex].following,
+      followers: users[targetUserIndex].followers
+    };
   },
-  
+
   getSuggestedUsers() {
     const users = this.getUsers();
     const currentUser = this.getCurrentUser();
@@ -260,10 +260,10 @@ const DataManager = {
       return [];
     }
 
-    return users.filter(u => u.id !== currentUser.id && !currentUser.following.includes(u.id)).slice(0,5);
-    },
+    return users.filter(u => u.id !== currentUser.id && !currentUser.following.includes(u.id)).slice(0, 5);
+  },
 
-    getFeedPosts(filter = "all") {
+  getFeedPosts(filter = "all") {
     const posts = this.getPosts();
     const currentUser = this.getCurrentUser();
 
@@ -276,9 +276,9 @@ const DataManager = {
     }
 
     return posts;
-    },
-    
-    getUserLikedPosts(userId) {
+  },
+
+  getUserLikedPosts(userId) {
     const posts = this.getPosts();
     return posts.filter(p => p.likes.includes(userId));
   },
@@ -287,12 +287,12 @@ const DataManager = {
     const user = this.getUserById(userId);
     const posts = this.getUserPosts(userId);
     const likedPosts = this.getUserLikedPosts(userId);
-    
-    return {    
-        postCount: posts.length,
-        followersCount: user ? user.followers.length : 0,
-        followingCount: user ? user.following.length : 0,
-        likedCount: likedPosts.length
+
+    return {
+      postCount: posts.length,
+      followersCount: user ? user.followers.length : 0,
+      followingCount: user ? user.following.length : 0,
+      likedCount: likedPosts.length
     };
   },
 
@@ -329,26 +329,26 @@ const DataManager = {
           id: "111",
           userId: "1",
           username: "Ammar",
-          userProfilePicture: "https://randomuser.me/api/portraits/men/1.jpg",  
+          userProfilePicture: "https://randomuser.me/api/portraits/men/1.jpg",
           content: "Hello world! This is my first post.",
-            image: "",
-            createdAt: new Date().toISOString(),
-            likes: [],
-            comments: []
-            },
-            {
-            id: "222",
-            userId: "2",
-            username: "Omar",
-            userProfilePicture: "https://randomuser.me/api/portraits/men/32.jpg",
-            content: "Excited to join this platform!",
-            image: "",
-            createdAt: new Date().toISOString(),
-            likes: [],
-            comments: []
+          image: "",
+          createdAt: new Date().toISOString(),
+          likes: [],
+          comments: []
+        },
+        {
+          id: "222",
+          userId: "2",
+          username: "Omar",
+          userProfilePicture: "https://randomuser.me/api/portraits/men/32.jpg",
+          content: "Excited to join this platform!",
+          image: "",
+          createdAt: new Date().toISOString(),
+          likes: [],
+          comments: []
         }
       ];
-      this.savePosts(samplePosts);  
+      this.savePosts(samplePosts);
     }
   }
 };

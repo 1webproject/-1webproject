@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return DataManager.getCurrentUser();
         }
 
-        const savedUser = localStorage.getItem("currentUser_user");
+        const savedUser = localStorage.getItem("currentUser");
         return savedUser ? JSON.parse(savedUser) : null;
     }
 

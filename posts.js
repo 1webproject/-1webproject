@@ -219,4 +219,41 @@
         createPostCard: createPostCard,
         renderPostList: renderPostList,
     };
+
+    function loadPost() {
+        const params = new URLSearchParams(window.location.search);
+        const postId = params.get("id");
+
+        if (!postId) {
+            document.body.innerHTML = "<p>Post not found</p>";
+            return;
+        }
+
+        const posts = window.SocialStore.getPosts();
+        const post = posts.find(p => String(p.id) === String(postId));
+
+        if (!post) {
+            document.body.innerHTML = "<p>Post not found</p>";
+            return;
+        }
+
+        const container = document.querySelector(".single-post");
+
+        if (!container) return;
+
+        const currentUser = window.SocialStore.getCurrentUser();
+        const currentUserId = currentUser ? currentUser.id : null;
+
+        container.innerHTML = "<h2>Post Details</h2>";
+
+        const postCard = window.postUI.createPostCard(post, {
+            currentUserId: currentUserId,
+            showCommentForm: true,
+            commentsLimit: 100,
+            showDetailLink: false,
+            onChange: loadPost
+        });
+
+        container.appendChild(postCard);
+    }
 })();
