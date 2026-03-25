@@ -9,9 +9,9 @@ const DataManager = {
     localStorage.setItem("users", JSON.stringify(users));
   },
 
-  getCurrentUser(user) {
-    const user = localStorage.getItem("currentUser");
-    return user ? JSON.parse(user) : null;
+  getCurrentUser() {
+    const savedUser = localStorage.getItem("currentUser");
+    return savedUser ? JSON.parse(savedUser) : null;
   },
 
   setCurrentUser(user) {
@@ -132,13 +132,13 @@ const DataManager = {
 
     if (!currentUser) {
       return { success: false, message: "User not logged in." };
-    };
+    }
 
     const postIndex = posts.findIndex(p => p.id === postId);
 
     if (postIndex === -1) {
       return { success: false, message: "Post not found." };
-    };
+    }
 
     const post = posts[postIndex];
     const likeIndex = post.likes.indexOf(currentUser.id);
