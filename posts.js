@@ -20,18 +20,12 @@
         }).format(new Date(timestamp));
     }
     function createAvatar(user) {
-        const img = document.createElement("img");
-        img.className = "avatar";
-
-        if (user && user.profilePicture && user.profilePicture.trim() !== "") {
-            img.src = user.profilePicture;
-        } else {
-            img.src = "images/avatar.jpg"; // الصورة الافتراضية
-        }
-
-        img.alt = user && user.username ? user.username : "User";
-
-        return img;
+        const avatar = document.createElement("span")
+        avatar.className = "avatar";
+        avatar.style.backgroundColor = user.avatarColor || "#1f7a8c";
+        avatar.textContent = (user.username || "U").charAt(0).toUpperCase();
+        avatar.setAttribute("aria-hidden", "true");
+        return avatar;
     }
 
     function createCommentItem(comment) {
