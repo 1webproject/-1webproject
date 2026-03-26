@@ -85,6 +85,100 @@
         });
     }
 
+    function createFollowingItem(user) {
+        const item = document.createElement("article");
+        item.className = "following-item";
+
+        const userInfo = document.createElement("div");
+        userInfo.className = "following-user";
+
+        const avatar = document.createElement("img");
+        avatar.className = "following-avatar";
+        avatar.src = user.profilePicture && user.profilePicture.trim() !== ""
+            ? user.profilePicture
+            : "https://via.placeholder.com/50";
+        avatar.alt = user.username + " avatar";
+
+        const copy = document.createElement("div");
+        copy.className = "following-copy";
+
+        const name = document.createElement("h3");
+        name.textContent = user.username || "Unknown User";
+
+        const bio = document.createElement("p");
+        bio.textContent = user.bio && user.bio.trim() !== "" ? user.bio : "No bio yet.";
+
+        copy.appendChild(name);
+        copy.appendChild(bio);
+        userInfo.appendChild(avatar);
+        userInfo.appendChild(copy);
+
+        const actions = document.createElement("div");
+        actions.className = "following-actions";
+
+        const profileLink = document.createElement("a");
+        profileLink.className = "btn btn-link btn-sm";
+        profileLink.href = "profile.html?user=" + encodeURIComponent(user.id);
+        profileLink.textContent = "View Profile";
+
+        const unfollowButton = document.createElement("button");
+        unfollowButton.type = "button";
+        unfollowButton.className = "btn btn-secondary btn-sm";
+        unfollowButton.textContent = "Unfollow";
+        unfollowButton.addEventListener("click", function () {
+            const result = DataManager.toggleFollow(user.id);
+
+            if (!result.success) {
+                alert(result.message || "Could not update follow status.");
+                return;
+            }
+
+            loadProfile();
+        });
+
+        actions.appendChild(profileLink);
+        actions.appendChild(unfollowButton);
+
+        item.appendChild(userInfo);
+        item.appendChild(actions);
+
+        return item;
+    }
+
+    function renderFollowingList(viewedUser, currentUser) {
+        const followingSection = document.getElementById("followingSection");
+        const followingList = document.getElementById("followingList");
+
+        if (!followingSection || !followingList || !currentUser || currentUser.id !== viewedUser.id) {
+            if (followingSection) {
+                followingSection.hidden = true;
+            }
+            return;
+        }
+
+        const followingIds = Array.isArray(currentUser.following) ? currentUser.following : [];
+        const followedUsers = followingIds
+            .map(function (userId) {
+                return DataManager.getUserById(userId);
+            })
+            .filter(Boolean);
+
+        followingSection.hidden = false;
+        followingList.textContent = "";
+
+        if (!followedUsers.length) {
+            const emptyState = document.createElement("p");
+            emptyState.className = "empty-state";
+            emptyState.textContent = "You are not following anyone yet.";
+            followingList.appendChild(emptyState);
+            return;
+        }
+
+        followedUsers.forEach(function (user) {
+            followingList.appendChild(createFollowingItem(user));
+        });
+    }
+
     function setupPostCreation(viewedUser, currentUser) {
         const postInput = document.getElementById("postInput");
         const postBtn = document.getElementById("postBtn");
@@ -200,6 +294,7 @@
         }
 
         fillProfileInfo(viewedUser);
+        renderFollowingList(viewedUser, currentUser);
         renderUserPosts(viewedUser.id);
         setupPostCreation(viewedUser, currentUser);
         setupProfileActions(viewedUser, currentUser);
