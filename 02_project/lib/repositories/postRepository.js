@@ -55,5 +55,12 @@ export const postRepository = {
 
         return { liked: true };
     },
+    async delete(postId) {
+        return prisma.post.delete({
+            where: {
+                id: postId,
+            },
+        });
+    },
 
 };

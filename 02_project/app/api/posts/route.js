@@ -24,3 +24,13 @@ export async function PUT(request) {
 
     return Response.json(result);
 }
+
+export async function DELETE(request) {
+    const data = await request.json();
+
+    await postRepository.delete(data.postId);
+
+    return Response.json({
+        success: true,
+    });
+}

@@ -47,6 +47,12 @@
     }
 
     function buildPost(post) {
+
+        const currentUser = getCurrentUser();
+
+        const isOwner =
+            currentUser &&
+            currentUser.id === post.userId;
         const profilePicture =
             post.user?.avatar && post.user.avatar.trim() !== ""
                 ? post.user.avatar
@@ -84,6 +90,14 @@
         </a>
 
         <a href="post.html?id=${encodeURIComponent(post.id)}">View Post</a>
+        ${isOwner ? `
+  <button
+    type="button"
+    class="delete-post-btn"
+    data-post-id="${post.id}">
+    Delete
+  </button>
+` : ""}
       </footer>
     </article>
   `;
@@ -106,6 +120,7 @@
             container.innerHTML += buildPost(post);
         });
         attachLikeActions();
+        attachDeleteActions();
     }
 
     function setupCreatePost(viewedUser) {
@@ -321,6 +336,36 @@
                 await loadProfile();
             });
         });
+    }
+    function attachDeleteActions() {
+
+        document
+            .querySelectorAll(".delete-post-btn")
+            .forEach(function (button) {
+
+                button.addEventListener("click", async function () {
+
+                    const postId =
+                        button.getAttribute("data-post-id");
+
+                    await fetch("/api/posts", {
+                        method: "DELETE",
+
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+
+                        body: JSON.stringify({
+                            postId,
+                        }),
+                    });
+
+                    await loadProfile();
+
+                });
+
+            });
+
     }
 
     async function loadProfile() {
