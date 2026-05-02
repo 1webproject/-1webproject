@@ -25,3 +25,13 @@ export async function PUT(request) {
 
     return Response.json(follow);
 }
+export async function PATCH(request) {
+    const data = await request.json();
+
+    const user = await userRepository.update(data.id, {
+        bio: data.bio,
+        avatar: data.avatar,
+    });
+
+    return Response.json(user);
+}

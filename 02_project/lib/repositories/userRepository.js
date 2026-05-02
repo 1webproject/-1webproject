@@ -58,4 +58,10 @@ export const userRepository = {
 
         return { following: true };
     },
+    async update(id, data) {
+        return prisma.user.update({
+            where: { id },
+            data,
+        });
+    },
 };
