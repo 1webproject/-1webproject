@@ -123,11 +123,61 @@
                 buildPost(post);
         });
     }
+    async function setupProfileActions(viewedUser) {
+        const actionsBox = document.querySelector(".profile-actions");
+
+        if (!actionsBox) {
+            return;
+        }
+
+        const savedUser = localStorage.getItem("currentUser");
+        const currentUser = savedUser ? JSON.parse(savedUser) : null;
+
+        actionsBox.innerHTML = "";
+
+        if (!currentUser || currentUser.id === viewedUser.id) {
+            return;
+        }
+
+        const users = await fetch("/api/users").then(function (res) {
+            return res.json();
+        });
+
+        const freshCurrentUser = users.find(function (user) {
+            return user.id === currentUser.id;
+        });
+
+        const followingIds = freshCurrentUser.following.map(function (follow) {
+            return follow.followingId;
+        });
+
+        const isFollowing = followingIds.includes(viewedUser.id);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = isFollowing ? "Unfollow" : "Follow";
+        button.addEventListener("click", async function () {
+            await fetch("/api/users", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    currentUserId: currentUser.id,
+                    targetUserId: viewedUser.id,
+                }),
+            });
+            await loadProfile();
+        });
+
+        actionsBox.appendChild(button);
+    }
 
     async function loadProfile() {
 
         const viewedUser =
             await getViewedUser();
+        await setupProfileActions(viewedUser);
 
         if (!viewedUser) {
             return;

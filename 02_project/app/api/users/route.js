@@ -18,7 +18,7 @@ export async function POST(request) {
 export async function PUT(request) {
     const data = await request.json();
 
-    const follow = await userRepository.follow(
+    const follow = await userRepository.toggleFollow(
         data.currentUserId,
         data.targetUserId
     );
