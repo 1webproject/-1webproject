@@ -40,12 +40,16 @@
     return `
       <article class="post" data-post-id="${escapeHtml(post.id)}">
         <header>
-          <img src="${escapeHtml(profilePicture)}" alt="Profile picture" width="50" height="50" />
-          <div>
-            <h3>${escapeHtml(post.user?.username || "Unknown User")}</h3>
-            <p>${escapeHtml(formatPostTime(post.createdAt))}</p>
-          </div>
-        </header>
+  <a href="profile.html?user=${encodeURIComponent(post.userId)}" class="post-user-link">
+    <img src="${escapeHtml(profilePicture)}" alt="Profile picture" width="50" height="50" />
+  </a>
+  <div>
+    <a href="profile.html?user=${encodeURIComponent(post.userId)}" class="post-user-link">
+      <h3>${escapeHtml(post.user?.username || "Unknown User")}</h3>
+    </a>
+    <p>${escapeHtml(formatPostTime(post.createdAt))}</p>
+  </div>
+</header>
 
         <p>${escapeHtml(post.content)}</p>
         ${post.image ? `<img class="post-image" src="${escapeHtml(post.image)}" alt="Post image" />` : ""}
@@ -90,7 +94,10 @@
     const searchInput = document.getElementById("discoverSearch");
     const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
 
-    const users = await fetch("/api/users").then((res) => res.json());
+    const users = await fetch("/api/users").then(function (res) {
+      return res.json();
+    });
+
     const currentUser = getCurrentUser();
 
     const filteredUsers = users.filter(function (user) {
@@ -114,7 +121,7 @@
     filteredUsers.forEach(function (user) {
       discoverList.innerHTML += `
       <article class="suggested-user">
-        <header>
+        <header class="discover-user-link" data-user-id="${escapeHtml(user.id)}">
           <img src="${escapeHtml(user.avatar || "https://via.placeholder.com/50")}" alt="${escapeHtml(user.username)} avatar" width="50" height="50" />
           <div>
             <h3>${escapeHtml(user.username)}</h3>
@@ -123,6 +130,13 @@
         </header>
       </article>
     `;
+    });
+
+    document.querySelectorAll(".discover-user-link").forEach(function (element) {
+      element.addEventListener("click", function () {
+        const userId = element.getAttribute("data-user-id");
+        window.location.href = "profile.html?user=" + encodeURIComponent(userId);
+      });
     });
   }
 

@@ -427,7 +427,7 @@ button:disabled,
   font-size: 0.86rem;
 }
 
-.feed-posts .post > p {
+.feed-posts .post>p {
   margin: 12px 0;
 }
 
@@ -959,4 +959,8 @@ button:disabled,
   .discover {
     position: static;
   }
+}
+
+.discover-user-link {
+  cursor: pointer;
 }

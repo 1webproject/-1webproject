@@ -2,10 +2,7 @@
     "use strict";
 
     function getProfileUserId() {
-        const params = new URLSearchParams(
-            window.location.search
-        );
-
+        const params = new URLSearchParams(window.location.search);
         return params.get("user");
     }
 
@@ -22,11 +19,8 @@
     }
 
     async function getViewedUser() {
-
         const users = await getUsers();
-
-        const userId =
-            getProfileUserId();
+        const userId = getProfileUserId();
 
         if (userId) {
             return users.find(function (user) {
@@ -146,6 +140,16 @@
         await renderUserPosts(
             viewedUser.id
         );
+        const savedUser = localStorage.getItem("currentUser");
+        const currentUser = savedUser ? JSON.parse(savedUser) : null;
+
+        const createPostBox = document.querySelector(".create-post");
+
+        if (createPostBox && (!currentUser || currentUser.id !== viewedUser.id)) {
+            createPostBox.style.display = "none";
+        } else if (createPostBox) {
+            createPostBox.style.display = "block";
+        }
     }
 
     window.loadProfile =
