@@ -1,19 +1,11 @@
 document.addEventListener("DOMContentLoaded", function () {
   function getCurrentUser() {
-    if (typeof DataManager !== "undefined" && typeof DataManager.getCurrentUser === "function") {
-      return DataManager.getCurrentUser();
-    }
-
     const savedUser = localStorage.getItem("currentUser");
     return savedUser ? JSON.parse(savedUser) : null;
   }
 
   function logout() {
-    if (typeof DataManager !== "undefined" && typeof DataManager.logout === "function") {
-      DataManager.logout();
-    } else {
-      localStorage.removeItem("currentUser");
-    }
+    localStorage.removeItem("currentUser");
     window.location.href = "login.html";
   }
 
@@ -46,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     avatarTargets.forEach(function (target) {
-      target.src = currentUser.profilePicture || "https://via.placeholder.com/50";
+      target.src = currentUser.avatar || "https://via.placeholder.com/50";
       target.alt = currentUser.username + " avatar";
     });
   }
