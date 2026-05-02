@@ -9,9 +9,6 @@
     "lint": "biome check",
     "format": "biome format --write"
   },
-  "prisma": {
-    "seed": "bun prisma/seed.js"
-  },
   "dependencies": {
     "@prisma/adapter-libsql": "^7.8.0",
     "@prisma/client": "^7.8.0",
