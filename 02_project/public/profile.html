@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - SERAJ</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="app-page profile-body">
+    <header class="topbar">
+        <nav class="site-nav">
+            <h1>Seraj</h1>
+            <ul>
+                <li><a href="feed.html">Feed</a></li>
+                <li><a href="profile.html" class="active">Profile</a></li>
+                <li><a href="login.html" data-logout>Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="profile-page">
+        <section class="profile-banner">
+            <img src="images/banner.jpeg" class="banner-img" alt="Profile banner" />
+        </section>
+
+        <section class="profile-info-box card">
+            <div class="profile-top">
+                <img src="images/avatar.jpg" class="profile-img" alt="Profile picture" />
+                <div class="profile-actions"></div>
+            </div>
+
+            <div class="profile-details">
+                <h1 id="name">Name</h1>
+                <span id="handle">@username</span>
+                <p id="bio">Bio goes here...</p>
+
+                <div class="profile-stats">
+                    <span><strong id="postsCount">0</strong> Posts</span>
+                    <span><strong id="followersCount">0</strong> Followers</span>
+                    <span><strong id="followingCount">0</strong> Following</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="followingSection" class="card following-panel" hidden>
+            <div class="following-header">
+                <h2>Following</h2>
+                <p class="muted">Manage the people you follow from here.</p>
+            </div>
+            <div id="followingList" class="following-list"></div>
+        </section>
+
+        <section class="create-post card">
+            <textarea id="postInput" placeholder="Share something..."></textarea>
+            <button id="postBtn">Post</button>
+        </section>
+
+        <section id="postsContainer" class="posts-list"></section>
+    </main>
+
+    <script src="seed.js"></script>
+  <script src="data.js"></script>
+  <script src="ui.js"></script>
+    <script src="posts.js"></script>
+    <script src="profile.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

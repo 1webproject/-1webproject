@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feed - SERAJ</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="app-page">
+    <header class="topbar">
+        <nav class="site-nav">
+            <h1>SERAJ</h1>
+            <ul>
+                <li><a href="feed.html">Feed</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="login.html" data-logout>Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="page-shell feed-layout">
+        <section class="feed-main">
+            <section class="create-post card">
+                <h2>Create a Post</h2>
+                <form>
+                    <label for="postContent">What is on your mind?</label>
+                    <textarea id="postContent" name="postContent" rows="4" placeholder="Write your post here..."></textarea>
+                    <label for="postImage">Attach Image (optional)</label>
+                    <input type="file" id="postImage" name="postImage" accept="image/*" />
+                    <button type="submit">Post</button>
+                </form>
+            </section>
+
+            <section class="feed-posts card">
+                <h2>News Feed</h2>
+            </section>
+        </section>
+
+        <aside class="discover card">
+            <h2>Discover People</h2>
+            <p class="muted">Follow people to unlock their posts in your feed.</p>
+            <input id="discoverSearch" type="text" placeholder="Search by username or email..." />
+            <div id="discoverList" class="discover-list"></div>
+        </aside>
+    </main>
+
+    <script src="seed.js"></script>
+  <script src="data.js"></script>
+  <script src="ui.js"></script>
+    <script src="feed.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

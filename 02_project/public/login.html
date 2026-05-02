@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - SERAJ</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="login-page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>Login</h1>
+        <p>Access your account</p>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <div class="form-group icon-input">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" required placeholder="example@gmail.com" />
+        </div>
+
+        <div class="form-group icon-input">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="******" />
+        </div>
+
+        <div class="auth-row">
+          <label class="remember-box">
+            <input type="checkbox" />
+            <span>Remember Me</span>
+          </label>
+          <span class="auth-muted-link disabled-link" aria-disabled="true">Forgot password</span>
+        </div>
+
+        <div id="login-error" class="error-message" role="alert" aria-live="polite"></div>
+        <button type="submit" class="login-button">Login</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Don't Have Account? <a href="register.html">Sign Up Here!</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="seed.js"></script>
+  <script src="data.js"></script>
+  <script src="ui.js"></script>
+  <script src="out-login.js"></script>
+</body>
+
+</html>
