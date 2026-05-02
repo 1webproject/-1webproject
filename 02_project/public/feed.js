@@ -87,24 +87,45 @@
       return;
     }
 
+    const searchInput = document.getElementById("discoverSearch");
+    const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
     const users = await fetch("/api/users").then((res) => res.json());
+    const currentUser = getCurrentUser();
+
+    const filteredUsers = users.filter(function (user) {
+      const isCurrentUser = currentUser && user.id === currentUser.id;
+      const username = String(user.username || "").toLowerCase();
+      const email = String(user.email || "").toLowerCase();
+
+      return (
+        !isCurrentUser &&
+        (query === "" || username.includes(query) || email.includes(query))
+      );
+    });
 
     discoverList.innerHTML = "";
 
-    users.forEach(function (user) {
+    if (filteredUsers.length === 0) {
+      discoverList.innerHTML = '<p class="muted">No users found.</p>';
+      return;
+    }
+
+    filteredUsers.forEach(function (user) {
       discoverList.innerHTML += `
-        <article class="suggested-user">
-          <header>
-            <img src="${escapeHtml(user.avatar || "https://via.placeholder.com/50")}" alt="${escapeHtml(user.username)} avatar" width="50" height="50" />
-            <div>
-              <h3>${escapeHtml(user.username)}</h3>
-              <p>${escapeHtml(user.bio || "No bio yet.")}</p>
-            </div>
-          </header>
-        </article>
-      `;
+      <article class="suggested-user">
+        <header>
+          <img src="${escapeHtml(user.avatar || "https://via.placeholder.com/50")}" alt="${escapeHtml(user.username)} avatar" width="50" height="50" />
+          <div>
+            <h3>${escapeHtml(user.username)}</h3>
+            <p>${escapeHtml(user.bio || "No bio yet.")}</p>
+          </div>
+        </header>
+      </article>
+    `;
     });
   }
+
 
   function setupCreatePost() {
     const form = document.querySelector(".create-post form");
@@ -150,6 +171,11 @@
     await renderPosts();
     await renderSuggestedUsers();
     setupCreatePost();
+    const searchInput = document.getElementById("discoverSearch");
+
+    if (searchInput) {
+      searchInput.addEventListener("input", renderSuggestedUsers);
+    }
   }
 
   window.loadFeed = loadFeed;
