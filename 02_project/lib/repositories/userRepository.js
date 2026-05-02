@@ -23,5 +23,10 @@ export const userRepository = {
             },
         });
     },
+    async create(data) {
+        return prisma.user.create({
+            data,
+        });
+    },
 
 };
