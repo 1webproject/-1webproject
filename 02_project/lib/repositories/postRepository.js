@@ -22,4 +22,34 @@ export const postRepository = {
         });
     },
 
+    async toggleLike(postId, userId) {
+        const existingLike = await prisma.like.findUnique({
+            where: {
+                userId_postId: {
+                    userId,
+                    postId,
+                },
+            },
+        });
+
+        if (existingLike) {
+            await prisma.like.delete({
+                where: {
+                    id: existingLike.id,
+                },
+            });
+
+            return { liked: false };
+        }
+
+        await prisma.like.create({
+            data: {
+                userId,
+                postId,
+            },
+        });
+
+        return { liked: true };
+    },
+
 };

@@ -79,12 +79,45 @@
         ${post.image ? `<img class="post-image" src="${escapeHtml(post.image)}" alt="Post image" />` : ""}
 
         <footer>
-          <button type="button" disabled>Like (${likesCount})</button>
-          <button type="button" disabled>Comment (${commentsCount})</button>
+          <button type="button" class="like-btn" data-post-id="${escapeHtml(post.id)}">
+  Like (${likesCount})
+</button>
+
+<a class="comment-btn" href="post.html?id=${encodeURIComponent(post.id)}">
+  Comment (${commentsCount})
+</a>
           <a href="post.html?id=${encodeURIComponent(post.id)}">View Post</a>
         </footer>
       </article>
     `;
+  }
+
+  function attachLikeActions() {
+    document.querySelectorAll(".like-btn").forEach(function (button) {
+      button.addEventListener("click", async function () {
+        const currentUser = getCurrentUser();
+
+        if (!currentUser) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        const postId = button.getAttribute("data-post-id");
+
+        await fetch("/api/posts", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            postId,
+            userId: currentUser.id,
+          }),
+        });
+
+        await renderPosts();
+      });
+    });
   }
 
   async function renderPosts() {
@@ -106,6 +139,7 @@
     posts.forEach(function (post) {
       postsContainer.innerHTML += buildPostCard(post);
     });
+    attachLikeActions();
   }
 
   async function renderSuggestedUsers() {

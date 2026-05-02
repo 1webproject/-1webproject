@@ -13,3 +13,14 @@ export async function POST(request) {
         status: 201,
     });
 }
+
+export async function PUT(request) {
+    const data = await request.json();
+
+    const result = await postRepository.toggleLike(
+        data.postId,
+        data.userId
+    );
+
+    return Response.json(result);
+}
