@@ -7,7 +7,11 @@ export const postRepository = {
             include: {
                 user: true,
                 likes: true,
-                comments: true,
+                comments: {
+                    include: {
+                        user: true,
+                    },
+                },
             },
 
             orderBy: {
