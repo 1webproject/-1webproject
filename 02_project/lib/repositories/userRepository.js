@@ -29,4 +29,12 @@ export const userRepository = {
         });
     },
 
+    async follow(currentUserId, targetUserId) {
+        return prisma.follow.create({
+            data: {
+                followerId: currentUserId,
+                followingId: targetUserId,
+            },
+        });
+    }
 };

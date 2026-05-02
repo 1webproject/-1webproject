@@ -13,4 +13,15 @@ export async function POST(request) {
     return Response.json(user, {
         status: 201,
     });
+
+}
+export async function PUT(request) {
+    const data = await request.json();
+
+    const follow = await userRepository.follow(
+        data.currentUserId,
+        data.targetUserId
+    );
+
+    return Response.json(follow);
 }

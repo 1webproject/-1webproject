@@ -7,7 +7,31 @@
   }
 
   async function getFeedPosts() {
-    return fetch("/api/posts").then((res) => res.json());
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      return [];
+    }
+
+    const posts = await fetch("/api/posts").then(function (res) {
+      return res.json();
+    });
+
+    const users = await fetch("/api/users").then(function (res) {
+      return res.json();
+    });
+
+    const freshCurrentUser = users.find(function (user) {
+      return user.id === currentUser.id;
+    });
+
+    const followingIds = freshCurrentUser.following.map(function (follow) {
+      return follow.followingId;
+    });
+
+    return posts.filter(function (post) {
+      return post.userId === currentUser.id || followingIds.includes(post.userId);
+    });
   }
 
   function escapeHtml(value) {
@@ -121,15 +145,91 @@
     filteredUsers.forEach(function (user) {
       discoverList.innerHTML += `
       <article class="suggested-user">
-        <header class="discover-user-link" data-user-id="${escapeHtml(user.id)}">
-          <img src="${escapeHtml(user.avatar || "https://via.placeholder.com/50")}" alt="${escapeHtml(user.username)} avatar" width="50" height="50" />
+
+        <header class="discover-user-link" data-user-id="${user.id}">
+          <img src="${escapeHtml(user.avatar || "https://via.placeholder.com/50")}" />
+          
           <div>
             <h3>${escapeHtml(user.username)}</h3>
             <p>${escapeHtml(user.bio || "No bio yet.")}</p>
           </div>
         </header>
+
+        <button 
+          class="follow-btn"
+          data-user-id="${user.id}">
+          Follow
+        </button>
+
       </article>
     `;
+    });
+
+    document.querySelectorAll(".discover-user-link").forEach(function (element) {
+      element.addEventListener("click", function () {
+        const userId = element.dataset.userId;
+        window.location.href = "profile.html?user=" + userId;
+      });
+    });
+
+    document.querySelectorAll(".follow-user-btn").forEach(function (button) {
+
+      button.addEventListener("click", async function () {
+
+        const userId =
+          button.getAttribute("data-user-id");
+
+        await fetch("/api/users", {
+
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            currentUserId: currentUser.id,
+            targetUserId: userId,
+          }),
+
+        });
+
+        notify("User followed.", "success");
+
+        await renderPosts();
+        await renderSuggestedUsers();
+
+      });
+    });
+
+
+
+    discoverList.innerHTML = "";
+
+    if (filteredUsers.length === 0) {
+      discoverList.innerHTML = '<p class="muted">No users found.</p>';
+      return;
+    }
+
+    filteredUsers.forEach(function (user) {
+      discoverList.innerHTML += `
+    <article class="suggested-user">
+      <header class="discover-user-link" data-user-id="${escapeHtml(user.id)}">
+        <img src="${escapeHtml(user.avatar || "https://via.placeholder.com/50")}" alt="${escapeHtml(user.username)} avatar" width="50" height="50" />
+        <div>
+          <h3>${escapeHtml(user.username)}</h3>
+          <p>${escapeHtml(user.bio || "No bio yet.")}</p>
+        </div>
+      </header>
+
+      <div class="suggested-actions">
+        <a href="profile.html?user=${encodeURIComponent(user.id)}">View Profile</a>
+        <button type="button" class="follow-user-btn" data-user-id="${escapeHtml(user.id)}">
+          Follow
+        </button>
+      </div>
+    </article>
+  `;
     });
 
     document.querySelectorAll(".discover-user-link").forEach(function (element) {
@@ -144,6 +244,7 @@
   function setupCreatePost() {
     const form = document.querySelector(".create-post form");
     const textarea = document.getElementById("postContent");
+    const imageInput = document.getElementById("postImage");
 
     if (!form || !textarea) {
       return;
@@ -152,11 +253,12 @@
     form.addEventListener("submit", async function (event) {
       event.preventDefault();
 
-      const currentUser = await getCurrentUser();
+      const currentUser = getCurrentUser();
       const content = textarea.value.trim();
+      const file = imageInput && imageInput.files ? imageInput.files[0] : null;
 
       if (!currentUser) {
-        notify("No user found.");
+        window.location.href = "login.html";
         return;
       }
 
@@ -165,19 +267,42 @@
         return;
       }
 
-      await fetch("/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: content,
-          userId: currentUser.id,
-        }),
-      });
+      function createPost(imageData) {
+        return fetch("/api/posts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: content,
+            image: imageData || "",
+            userId: currentUser.id,
+          }),
+        });
+      }
 
-      textarea.value = "";
-      await renderPosts();
+      if (!file) {
+        await createPost("");
+        textarea.value = "";
+        if (imageInput) imageInput.value = "";
+        await renderPosts();
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = async function (loadEvent) {
+        await createPost(loadEvent.target.result);
+        textarea.value = "";
+        imageInput.value = "";
+        await renderPosts();
+      };
+
+      reader.onerror = function () {
+        notify("Could not read selected image.");
+      };
+
+      reader.readAsDataURL(file);
     });
   }
 
