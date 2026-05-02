@@ -30,11 +30,18 @@ export const userRepository = {
     },
 
     async follow(currentUserId, targetUserId) {
-        return prisma.follow.create({
-            data: {
+        return prisma.follow.upsert({
+            where: {
+                followerId_followingId: {
+                    followerId: currentUserId,
+                    followingId: targetUserId,
+                },
+            },
+            update: {},
+            create: {
                 followerId: currentUserId,
                 followingId: targetUserId,
             },
         });
-    }
+    },
 };

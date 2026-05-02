@@ -124,13 +124,26 @@
 
     const currentUser = getCurrentUser();
 
+    const freshCurrentUser = users.find(function (user) {
+      return currentUser && user.id === currentUser.id;
+    });
+
+    const followingIds = freshCurrentUser
+      ? freshCurrentUser.following.map(function (follow) {
+        return follow.followingId;
+      })
+      : [];
+
     const filteredUsers = users.filter(function (user) {
       const isCurrentUser = currentUser && user.id === currentUser.id;
+      const isAlreadyFollowing = followingIds.includes(user.id);
+
       const username = String(user.username || "").toLowerCase();
       const email = String(user.email || "").toLowerCase();
 
       return (
         !isCurrentUser &&
+        !isAlreadyFollowing &&
         (query === "" || username.includes(query) || email.includes(query))
       );
     });
@@ -216,6 +229,7 @@
     <article class="suggested-user">
       <header class="discover-user-link" data-user-id="${escapeHtml(user.id)}">
         <img src="${escapeHtml(user.avatar || "https://via.placeholder.com/50")}" alt="${escapeHtml(user.username)} avatar" width="50" height="50" />
+
         <div>
           <h3>${escapeHtml(user.username)}</h3>
           <p>${escapeHtml(user.bio || "No bio yet.")}</p>
@@ -238,8 +252,29 @@
         window.location.href = "profile.html?user=" + encodeURIComponent(userId);
       });
     });
-  }
 
+    document.querySelectorAll(".follow-user-btn").forEach(function (button) {
+      button.addEventListener("click", async function () {
+        const userId = button.getAttribute("data-user-id");
+
+        await fetch("/api/users", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            currentUserId: currentUser.id,
+            targetUserId: userId,
+          }),
+        });
+
+        notify("User followed.", "success");
+
+        await renderPosts();
+        await renderSuggestedUsers();
+      });
+    });
+  }
 
   function setupCreatePost() {
     const form = document.querySelector(".create-post form");
