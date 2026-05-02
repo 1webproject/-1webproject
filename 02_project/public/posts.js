@@ -175,6 +175,22 @@
         return user ? JSON.parse(user) : null;
     }
 
+    const backBtn =
+        document.getElementById("backBtn");
+
+    if (backBtn) {
+
+        backBtn.addEventListener(
+            "click",
+
+            function () {
+                window.history.back();
+            }
+
+        );
+
+    }
+
     window.loadPost = loadPost;
 
 })();
