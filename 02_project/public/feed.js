@@ -1,9 +1,9 @@
 (function () {
   "use strict";
 
-  async function getCurrentUser() {
-    const users = await fetch("/api/users").then((res) => res.json());
-    return users[0] || null;
+  function getCurrentUser() {
+    const user = localStorage.getItem("currentUser");
+    return user ? JSON.parse(user) : null;
   }
 
   async function getFeedPosts() {

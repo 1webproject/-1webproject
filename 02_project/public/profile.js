@@ -34,7 +34,8 @@
             });
         }
 
-        return users[0] || null;
+        const savedUser = localStorage.getItem("currentUser");
+        return savedUser ? JSON.parse(savedUser) : null;
     }
 
     function fillProfileInfo(user) {
