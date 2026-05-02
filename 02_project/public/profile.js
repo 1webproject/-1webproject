@@ -281,14 +281,30 @@
             if (!user) return;
 
             list.innerHTML += `
-        <article class="following-item">
-          <div>
-            <h3>${user.username}</h3>
-            <p>${user.bio || "No bio yet."}</p>
-          </div>
-          <a href="profile.html?user=${encodeURIComponent(user.id)}">View Profile</a>
-        </article>
-      `;
+  <article class="following-item">
+
+    <div class="following-user-info">
+
+      <img
+        src="${user.avatar || "https://via.placeholder.com/50"}"
+        alt="${user.username} avatar"
+        width="50"
+        height="50"
+      />
+
+      <div>
+        <h3>${user.username}</h3>
+        <p>${user.bio || "No bio yet."}</p>
+      </div>
+
+    </div>
+
+    <a href="profile.html?user=${encodeURIComponent(user.id)}">
+      View Profile
+    </a>
+
+  </article>
+`;
         });
     }
 

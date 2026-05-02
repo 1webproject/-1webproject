@@ -993,3 +993,14 @@ button:disabled,
   font-size: 14px;
   cursor: pointer;
 }
+
+.following-user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.following-user-info img {
+  border-radius: 50%;
+  object-fit: cover;
+}
