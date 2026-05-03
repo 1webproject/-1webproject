@@ -1,13 +1,7 @@
-async function getStats() {
-    const response = await fetch("http://localhost:3000/api/stats", {
-        cache: "no-store",
-    });
-
-    return response.json();
-}
+import { statsRepository } from "@/lib/repositories/statsRepository";
 
 export default async function StatsPage() {
-    const stats = await getStats();
+    const stats = await statsRepository.getOverview();
 
     return (
         <main style={{ padding: "40px", fontFamily: "Arial" }}>
@@ -19,13 +13,13 @@ export default async function StatsPage() {
                 <div>Total Comments: {stats.totalComments}</div>
                 <div>Total Likes: {stats.totalLikes}</div>
                 <div>Average Posts Per User: {stats.avgPostsPerUser}</div>
+
                 <div>
-                    Most Active User: {stats.mostActiveUser?.username} (
-                    {stats.mostActiveUser?._count?.posts} posts)
+                    Most Active User: {stats.mostActiveUser?.username}
                 </div>
+
                 <div>
-                    Most Liked Post: {stats.mostLikedPost?.content} (
-                    {stats.mostLikedPost?._count?.likes} likes)
+                    Most Liked Post: {stats.mostLikedPost?.content}
                 </div>
             </section>
         </main>
