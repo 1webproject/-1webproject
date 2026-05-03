@@ -1,4 +1,5 @@
 import { statsRepository } from "@/lib/repositories/statsRepository";
+export const dynamic = "force-dynamic";
 
 export default async function StatsPage() {
     const stats = await statsRepository.getOverview();
